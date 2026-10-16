@@ -10,9 +10,9 @@ type Employee struct {
 }
 
 type EmployeeRequest struct {
-	Name    string `json:"name"`
-	HiredAt string `json:"hired_at"`
-	Cpf     string `json:"cpf"`
+	Name  string `json:"name"`
+	Shift string `json:"shift"`
+	CPF   string `json:"cpf"`
 }
 
 type ListEmployeesParams struct {

@@ -3,11 +3,11 @@ package car
 import "time"
 
 type CarRequest struct {
-	Owner        string  `json:"customer_id"`
+	CustomerID   string  `json:"customer_id"`
 	LicensePlate string  `json:"license_plate"`
 	Model        string  `json:"model"`
 	Brand        string  `json:"brand"`
-	ModelYear    int     `json:"mode_year"`
+	ModelYear    int     `json:"model_year"`
 	Color        *string `json:"color"`
 	Km           *int    `json:"km"`
 	Observation  *string `json:"observation"`
