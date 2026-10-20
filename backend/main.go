@@ -1,27 +1,47 @@
 package main
 
 import (
+	"context"
 	"log"
-	"net/http"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/viniciusalexandrre/oficina/backend/config"
+	"github.com/viniciusalexandrre/oficina/backend/customer"
 	"github.com/viniciusalexandrre/oficina/backend/database"
+	"go.uber.org/fx"
 )
 
 func main() {
-	router := Routes()
-	env, err := config.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
+	fx.New(
+		fx.Provide(
+			config.LoadEnv,
+			database.DatabaseConnection,
+			NewFiberApp,
+			customer.NewCustomerModule,
+		),
+		fx.Invoke(
+			RegisterRoutes,
+			StartServer,
+		),
+	).Run()
+}
 
-	db, err := database.DatabaseConnection(env)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+func NewFiberApp() *fiber.App {
+	return fiber.New()
+}
 
-	log.Println("servidor rodando em http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
-
+func StartServer(lc fx.Lifecycle, app *fiber.App) {
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			go func() {
+				if err := app.Listen(":8080"); err != nil {
+					log.Println(err)
+				}
+			}()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return app.ShutdownWithContext(ctx)
+		},
+	})
 }

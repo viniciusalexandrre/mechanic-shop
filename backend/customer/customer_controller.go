@@ -1,25 +1,66 @@
 package customer
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
-func CreateCustomer(w http.ResponseWriter, r *http.Request) {
-	bodyRequest, err := io.ReadAll(r.Body)
+func (m *CustomerModule) CreateCustomer(c *fiber.Ctx) error {
+	var req CustomerRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "JSON inválido"})
+	}
+
+	if err := m.createCustomer(req); err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{"error": err.Message})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "ok"})
+}
+
+func (m *CustomerModule) UpdateCustomer(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if _, err := uuid.Parse(id); err != nil {
+		return c.Status(ErrInvalidID.Code).JSON(fiber.Map{"error": ErrInvalidID.Message})
+	}
+
+	var req CustomerRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "JSON inválido"})
+	}
+
+	if err := m.updateCustomer(id, req); err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{"error": err.Message})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "ok"})
+}
+
+func (m *CustomerModule) DeleteCustomer(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if _, err := uuid.Parse(id); err != nil {
+		return c.Status(ErrInvalidID.Code).JSON(fiber.Map{"error": ErrInvalidID.Message})
+	}
+
+	if err := m.deleteCustomer(id); err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{"error": err.Message})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "ok"})
+}
+
+func (m *CustomerModule) ListCustomers(c *fiber.Ctx) error {
+	params := ListParams{
+		Search: c.Query("search"),
+		SortBy: c.Query("sort_by", "created_at"),
+		Order:  c.Query("order", "asc"),
+		Page:   c.QueryInt("page", 1),
+		Limit:  c.QueryInt("page_size", 20),
+	}
+
+	customers, err := m.listCustomers(params)
 	if err != nil {
-		http.Error(w, "JSON inválido", http.StatusBadRequest)
-		return
+		return c.Status(err.Code).JSON(fiber.Map{"error": err.Message})
 	}
 
-	var customer CustomerRequest
-
-	if err = json.Unmarshal(bodyRequest, &customer); err != nil {
-		http.Error(w, "JSON inválido: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	fmt.Println(customer)
+	return c.Status(fiber.StatusOK).JSON(customers)
 }

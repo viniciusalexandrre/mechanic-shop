@@ -1,25 +1,18 @@
 package database
 
 import (
-	"database/sql"
-	"fmt"
+	"log"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/viniciusalexandrre/oficina/backend/config"
 
 	_ "github.com/lib/pq"
 )
 
-// DatabaseConnection abre o pool de conexões com o PostgreSQL e confirma que o banco responde.
-func DatabaseConnection(env *config.EnvVars) (*sql.DB, error) {
-	db, err := sql.Open("postgres", env.DBConnectionString)
+func DatabaseConnection(env *config.EnvVars) *sqlx.DB {
+	db, err := sqlx.Connect("postgres", env.DB_CONNECTION_STRING)
 	if err != nil {
-		return nil, err
+		log.Panic(err.Error())
 	}
-
-	if err := db.Ping(); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("ping no banco: %w", err)
-	}
-
-	return db, nil
+	return db
 }

@@ -2,29 +2,21 @@ package car
 
 import "time"
 
-type CarRequest struct {
-	CustomerID   string  `json:"customer_id"`
-	LicensePlate string  `json:"license_plate"`
-	Model        string  `json:"model"`
-	Brand        string  `json:"brand"`
-	ModelYear    int     `json:"model_year"`
-	Color        *string `json:"color"`
-	Km           *int    `json:"km"`
-	Observation  *string `json:"observation"`
-	Image        *string `json:"image"`
-}
-
 type Car struct {
 	ID string `json:"id"`
 	CarRequest
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
-type ListCarsParams struct {
-	Search string
-	SortBy string
-	Order  string
-	Page   int
-	Limit  int
+type CarRequest struct {
+	CustomerID   string  `json:"customer_id" db:"customer_id"`
+	LicensePlate string  `json:"license_plate" db:"license_plate"`
+	Model        string  `json:"model" db:"model"`
+	Brand        string  `json:"brand" db:"brand"`
+	ModelYear    int     `json:"model_year" db:"model_year"`
+	Color        *string `json:"color" db:"color"`
+	Km           *int    `json:"km" db:"km"`
+	Observation  *string `json:"observation" db:"observation"`
+	Image        *string `json:"image" db:"image"`
 }
