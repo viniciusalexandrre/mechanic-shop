@@ -1,6 +1,7 @@
 package customer
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -144,4 +145,38 @@ func (m *CustomerModule) listCustomers(params ListParams) ([]Customer, *fiber.Er
 	}
 
 	return customers, nil
+}
+
+const maxNameResults = 20
+
+func (m *CustomerModule) listUserNamesCustomers(prefix string) ([]CustomerName, *fiber.Error) {
+	query := `
+		SELECT id, name
+		FROM customers
+		WHERE name ILIKE $1
+		ORDER BY name
+		LIMIT $2`
+
+	names := []CustomerName{}
+	if err := m.Db.Select(&names, query, prefix+"%", maxNameResults); err != nil {
+		log.Println("listar nomes dos clientes:", err)
+		return nil, ErrListFailed
+	}
+
+	return names, nil
+}
+
+func (m *CustomerModule) getCustomerByID(id string) (Customer, *fiber.Error) {
+	var customer Customer
+
+	err := m.Db.Get(&customer, `SELECT * FROM customers WHERE id = $1`, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return Customer{}, ErrCustomerNotFound
+	}
+	if err != nil {
+		log.Println("buscar cliente:", err)
+		return Customer{}, ErrGetFailed
+	}
+
+	return customer, nil
 }

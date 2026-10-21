@@ -11,6 +11,7 @@ var (
 	ErrCustomerNotFound = fiber.NewError(fiber.StatusNotFound, "Cliente não encontrado")
 	ErrUpdateFailed     = fiber.NewError(fiber.StatusInternalServerError, "Erro ao atualizar o cliente")
 	ErrListFailed       = fiber.NewError(fiber.StatusInternalServerError, "Erro ao listar os clientes")
+	ErrGetFailed        = fiber.NewError(fiber.StatusInternalServerError, "Erro ao buscar o cliente")
 	ErrDeleteFailed     = fiber.NewError(fiber.StatusInternalServerError, "Erro ao deletar o cliente")
 	ErrCustomerHasCars  = fiber.NewError(fiber.StatusConflict, "Cliente possui carros cadastrados e não pode ser deletado")
 )
